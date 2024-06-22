@@ -30,8 +30,15 @@ app.post("/register", async (req, res) => {
   try {
     const { username } = req.body;
     const { password } = req.body;
-    await db.query(`INSERT INTO users (email, password) VALUES($1, $2)`, [username, password]);
-    res.render('secrets.ejs');
+    const checkEmail = await db.query("SELECT * FROM users WHERE email = $1", [username]);
+    if (checkEmail.rows.length > 0) {
+      res.send("This email has been already used. Try to logging in");
+    } else {
+
+      await db.query(`INSERT INTO users (email, password) VALUES($1, $2)`, [username, password]);
+      res.render('secrets.ejs');
+
+    }
   } catch (error) {
     console.log(error);
   }
@@ -40,6 +47,16 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { username } = req.body;
   const { password } = req.body;
+  const checkEmail = await db.query("SELECT * FROM users WHERE email = $1", [username]);
+  //Revisamos si el usuario esta logeado
+  if(checkEmail.rows.length > 0) {
+    //Revisamos si la contraseña es correcta
+      checkEmail.rows[0].password === password ? res.render("secrets.ejs") : res.send("Incorrect Password");
+  } else {
+    //Si no esta loggeado le mandamos un mensaje
+    res.send("Email not registered yet. Register Now!");
+  }
+
 });
 
 //Listening Server
