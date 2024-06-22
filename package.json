@@ -6,7 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
+<<<<<<< HEAD
     "dev": "node index.js"
+=======
+    "dev": "nodemon index.js"
+>>>>>>> dev
   },
   "keywords": [],
   "author": "",
