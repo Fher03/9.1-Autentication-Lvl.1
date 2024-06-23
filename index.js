@@ -6,18 +6,20 @@ import bcrypt from 'bcrypt';
 import session from "express-session";
 import passport from "passport";
 import { Strategy } from "passport-local";
+import env from "dotenv";
 
 db.connect();
 const app = express();
 const port = 3000;
-const saltRounds = 12;
+const saltRounds = process.env.SALT_ROUNDS;
+env.config();
 
 //Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.use(session({
-  secret: "TOPSECRETWORD",
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -44,7 +46,6 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/secrets", (req, res) => {
-  console.log(req.user.id);
   if (req.isAuthenticated()) {
     res.render("secrets.ejs")
   } else {
