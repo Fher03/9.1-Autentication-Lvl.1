@@ -2,7 +2,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import db from "./db.js";
-import bcrypt, { hash } from 'bcrypt';
+import bcrypt from 'bcrypt';
 
 db.connect();
 const app = express();
