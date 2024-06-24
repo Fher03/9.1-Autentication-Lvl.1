@@ -7,6 +7,7 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy } from "passport-local";
 import env from "dotenv";
+import GoogleStrategy from 'passport-google-oauth2'
 
 db.connect();
 const app = express();
@@ -37,6 +38,10 @@ app.get("/", (req, res) => {
   res.render("home.ejs");
 });
 
+app.get("auth/google", passport.authenticate("google", {
+  scope: ["profile", "email"],
+}))
+
 app.get("/login", (req, res) => {
   res.render("login.ejs");
 });
@@ -53,12 +58,17 @@ app.get("/secrets", (req, res) => {
   }
 })
 
+app.get("/logout", (req, res) => { 
+  res.render("login.ejs");
+})
+
+
+//POST request
 app.post("/login", passport.authenticate("local", {
   successRedirect: "/secrets",
   failureRedirect: "/login"
 }));
 
-//POST request
 app.post("/register", async (req, res) => {
   try {
     //Tomamos los datos del usuario
@@ -90,16 +100,15 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
-passport.use(new Strategy(async function verify(username, password, cb) {
+//Estrategia Local
+passport.use("local", new Strategy(async function verify(username, password, cb) {
   try {
     const result = await db.query("SELECT * FROM users WHERE email = $1", [username]);
     const user = result.rows[0]
-    const dbPassword = user.password;
     //Revisamos si el usuario esta logeado
     if (result.rows.length > 0) {
       //Revisamos si la contraseña es correcta mediante bcrypt
-      bcrypt.compare(password, dbPassword, (err, password) => {
+      bcrypt.compare(password, user.password, (err, password) => {
         if (err) {
           return cb(err)
         } else {
@@ -119,6 +128,17 @@ passport.use(new Strategy(async function verify(username, password, cb) {
   }
 }));
 
+//Estrategia de Google
+passport.use("google", new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: 'http://localhost:3000/auth/google/secrets',
+  userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+}, async (accessToken, refreshToken, profile, cb) => {
+  console.log(profile);
+}))
+
+//Serialize and deserialize User 
 passport.serializeUser((user, cb) => {
   cb(null, user);
 })
