@@ -8,6 +8,7 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import env from "dotenv";
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2'
+import RateLimit from 'express-rate-limit'
 
 db.connect();
 const app = express();
