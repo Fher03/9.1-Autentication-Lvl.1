@@ -8,12 +8,19 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import env from "dotenv";
 import GoogleStrategy from 'passport-google-oauth2'
+import RateLimit from "express-rate-limit";
 
 db.connect();
 const app = express();
 const port = 3000;
 const saltRounds = process.env.SALT_ROUNDS;
+var limiter = RateLimit({
+  windowMs: 1000 * 60 * 15,
+  max: 100,
+})
 env.config();
+
+app.use(limiter);
 
 //Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
