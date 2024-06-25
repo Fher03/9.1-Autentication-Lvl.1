@@ -45,7 +45,7 @@ app.get("/", (req, res) => {
   res.render("home.ejs");
 });
 
-app.get("auth/google", passport.authenticate("google", {
+app.get("/auth/google", passport.authenticate("google", {
   scope: ["profile", "email"],
 }))
 
